@@ -20,7 +20,7 @@ def val(s):
     elif heuristic == "Tiles":
         return state.hdistance1(s) + state.path_len(s)
     elif heuristic == "Manhattan":
-        return state.hdistance2(s) + 4*state.path_len(s)
+        return state.hdistance2(s) + state.path_len(s)
     elif heuristic == "Weighted":
         return 4 * state.hdistance2(s) + state.hdistance1(s) + state.path_len(s)
     elif heuristic == "Linear":
