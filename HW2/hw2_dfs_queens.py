@@ -1234,12 +1234,71 @@ print(total_moves/30)
 
 
 
-# final table
+# Final table
 
 # British Museum with n=8 (or 4 or 6)       1158.1790447235107 milliseconds
-# DFS from n=8 to 25                10/18 .297 seconds.           i belive mine dosnt solve all since youve mentioned for dfs we can break after 100000 iterations
+# DFS from n=8 to 25                10/18 .297 seconds.           I belive mine dosnt solve all since youve mentioned for dfs we can break after 100000 iterations
 # Basic Hill Climbing               0/93 18.801 seconds
 # Restart Hill Climbing             11/93 17.847 seconds
 # Sideways Hill Climbing            93/93 2.228 seconds
 # Simple Heuristic Hill Climbing    93/93 0.333 seconds
 # Forward Checking                  93/93  8.454 seconds
+
+# explanation of all logic used
+
+# British Museum
+# The British Museum algorithm works by generating all possible board configurations and checking which ones are valid. 
+# However, the way I implemented it was to generate one board at a time and immediately check whether it was valid, rather 
+# than first storing all possible boards and then checking them.
+# This made my implementation faster because I didn't need to generate and store every possible board before checking for 
+# a solution. Once a valid board was found, the algorithm could immediately stop.
+
+# Simple Hill Climbing
+# My approach was to use my method for calculating the conflict value of the queens and then check how that value would change 
+# for each possible move.The goal was to continuously find a move that would improve the board by reducing the number of conflicts.
+# However, as I learned while testing, this algorithm can get stuck very easily. Sometimes there is no move that improves the current board,
+# even though the board is not a solution. This is because the algorithm can reach a local minimum where it cannot find a better move.
+
+# Hill Climbing with Restart
+# For this algorithm, I used the same basic logic as Simple Hill Climbing, but added a restart mechanism.
+# Instead of continuing to work with the same board when the algorithm was no longer making progress, I would generate a new random board and 
+# try again.
+# I decided to use time as my threshold rather than a fixed number of iterations because I believed the amount of time spent searching would 
+# be a better way to limit how long the algorithm kept trying. This was my approach to preventing the algorithm from spending too much time on 
+# an unsuccessful search.
+
+# Hill Climbing with Sideways Correction
+# At first, I used the same basic approach as the other Hill Climbing algorithms. For each queen, I would check its possible moves and calculate
+# how each move affected the total conflict value of the board.
+# I also added sideways moves, which allow the algorithm to move to another board with the same conflict value when no better move is available.
+# This gives the algorithm a chance to continue searching instead of immediately getting stuck.
+# However, I realized that checking every possible move was taking too much time. For each potential queen movement, I was recalculating the 
+# conflicts for the entire board, even though most of the board had not changed.
+# To optimize this, I came up with an approach where I could keep track of the number of queens in each column and diagonal. This allowed me to 
+# calculate the effect of a possible move using the values I was already keeping track of, instead of recalculating every queen's conflicts each time.
+# This was a major improvement because it reduced the amount of repeated calculations and made the algorithm significantly faster.
+
+# Hill Climbing with Simple Heuristic
+# For this algorithm, I used a similar approach to the Sideways Hill Climbing implementation, but with a more randomized method for selecting moves.
+# Instead of always following the same order of possible moves, I used randomization to explore different possibilities and help the algorithm 
+# avoid repeatedly following the same path.
+# I also used the same optimization that I developed for Sideways Hill Climbing. By keeping track of the queens in each column and diagonal,
+# I could update the conflict information as queens moved rather than recalculating the entire board for every possible move.
+# This optimization made a very large difference in performance and allowed the algorithm to solve all the tested board sizes extremely quickly.
+
+# # Forward Checking
+# Forward Checking was one of the more difficult algorithms for me to optimize.
+# At first, I focused on improving the is_place_in_next_row_valid method, since this was responsible for checking whether a queen could be placed 
+# in a position while still leaving possible positions available in future rows.
+# I initially had trouble figuring out an efficient way to check ahead. Eventually, I used sets to keep track of the columns and diagonals already 
+# occupied by queens. This allowed me to check whether positions were valid without repeatedly comparing every queen against every other queen.
+# However, the algorithm was still extremely slow for certain board sizes. I realized that one of the problems was that I was always checking columns 
+# in the same order, from 0 to n-1. This could cause the algorithm to spend a very long time exploring an unsuccessful search path before backtracking.
+# To improve this, I randomized the order in which columns were checked. This made a significant difference, and I noticed that most board sizes were
+# now solved very quickly.
+# However, some board sizes would still take an extremely long time because the randomized order could occasionally lead to a bad search path.
+# To solve this, I added a restart mechanism after a certain number of iterations. If the algorithm had performed too many checks without finding
+# a solution, it would start over with a new randomized column order.
+# For this algorithm, I chose an iteration-based threshold instead of a time-based threshold because I wanted to limit the amount of search work being
+# performed. Larger boards naturally take different amounts of time, but I did not want the algorithm to continue exploring the same unsuccessful path indefinitely.
+# Combining randomized column ordering with iteration-based restarts made Forward Checking much more consistent and allowed it to solve all 93 board sizes in under one minute.
